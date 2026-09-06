@@ -1,0 +1,8 @@
+{
+  "name": "ncu-courses",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ]
+}
