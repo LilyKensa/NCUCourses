@@ -24,7 +24,7 @@ export enum Language {
   PARTIAL_HAKKA
 }
 
-export interface SimpleCourse {
+export interface Course {
   id: number;
   classNumber: string;
   title: string;
@@ -41,8 +41,4 @@ export interface SimpleCourse {
   department: string;
   targetDegree: Degree;
   language: Language;
-}
-
-export interface Course extends SimpleCourse {
-
 }

@@ -1,5 +1,6 @@
 import { startCli } from "./cli";
 import { Db } from "./database";
+import { Query } from "./lib/query";
 import { startServer } from "./server";
 
 startServer();

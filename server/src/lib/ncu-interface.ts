@@ -1,6 +1,6 @@
 import * as XmlJs from "xml-js";
 import { Utils } from "./utils";
-import { Course, Degree, Language, PasswordCard } from "@ncu-courses/shared/types";
+import { Course, Degree, Language, PasswordCard } from "@ncu-courses/shared/types/database";
 import { Db } from "../database";
 import * as cheerio from "cheerio";
 

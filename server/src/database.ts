@@ -2,7 +2,9 @@ import fs from "node:fs";
 import Path from "node:path";
 import Database from "better-sqlite3";
 import type { Database as DatabaseType } from "better-sqlite3";
-import { Course } from "@ncu-courses/shared/types";
+import { Course } from "@ncu-courses/shared/types/database";
+import { Query } from "./lib/query";
+import { QueryNode } from "@ncu-courses/shared/types/query";
 
 interface CourseRow {
   id: number;
@@ -101,20 +103,6 @@ export class Db {
 
   // --- CRUD Operations ---
 
-  static add(course: Course): void {
-    const db = this.getDb();
-    const stmt = db.prepare(`
-      INSERT OR REPLACE INTO courses (
-        id, classNumber, title, teacher, clocks, classrooms,
-        credits, people_limit, people_admitted, people_applying, passwordCard, department, targetDegree, language
-      ) VALUES (
-        @id, @classNumber, @title, @teacher, @clocks, @classrooms,
-        @credits, @people_limit, @people_admitted, @people_applying,  @passwordCard, @department, @targetDegree, @language
-      )
-    `);
-    stmt.run(this.toRow(course));
-  }
-
   static addMany(courses: Course[]): void {
     const db = this.getDb();
     const stmt = db.prepare(`
@@ -136,42 +124,6 @@ export class Db {
     insertTransaction(courses);
   }
 
-  static getById(id: number): Course | null {
-    const db = this.getDb();
-    const row = db.prepare("SELECT * FROM courses WHERE id = ?").get(id) as CourseRow | undefined;
-    return row ? this.toCourse(row) : null;
-  }
-
-  static getByClassNumber(classNumber: string): Course | null {
-    const db = this.getDb();
-    const row = db.prepare("SELECT * FROM courses WHERE classNumber = ?").get(classNumber) as CourseRow | undefined;
-    return row ? this.toCourse(row) : null;
-  }
-
-  static getByDepartment(department: string): Course[] {
-    const db = this.getDb();
-    const rows = db.prepare("SELECT * FROM courses WHERE department = ?").all(department) as CourseRow[];
-    return rows.map((r) => this.toCourse(r));
-  }
-
-  static getAll(): Course[] {
-    const db = this.getDb();
-    const rows = db.prepare("SELECT * FROM courses").all() as CourseRow[];
-    return rows.map((r) => this.toCourse(r));
-  }
-
-  static remove(id: number): boolean {
-    const db = this.getDb();
-    const result = db.prepare("DELETE FROM courses WHERE id = ?").run(id);
-    return result.changes > 0;
-  }
-
-  static removeByClassNumber(classNumber: string): boolean {
-    const db = this.getDb();
-    const result = db.prepare("DELETE FROM courses WHERE classNumber = ?").run(classNumber);
-    return result.changes > 0;
-  }
-
   static clear(): void {
     const db = this.getDb();
     db.prepare("DELETE FROM courses").run();
@@ -186,7 +138,7 @@ export class Db {
   static getAllKeys() {
     const db = this.getDb();
     const stmt = db.prepare("SELECT id FROM courses");
-    const rows = stmt.all() as { id: Course["id"] }[];
+    const rows = stmt.all() as Pick<Course, "id">[];
     return new Set(rows.map(row => row.id));
   }
 
@@ -194,5 +146,27 @@ export class Db {
     if (!this.db) return;
     this.db.close();
     this.db = null;
+  }
+
+  static query(filter?: QueryNode, limit = 100, offset = 0) {
+    const db = this.getDb();
+    
+    let baseSql = `SELECT * FROM courses`;
+    const params: any[] = [];
+
+    if (filter) {
+      const { sql } = Query.buildWhereClause(filter, params);
+      baseSql += ` WHERE ${sql}`;
+    }
+
+    baseSql += " LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
+    console.log(baseSql, params);
+
+    const stmt = db.prepare(baseSql);
+    const rows = stmt.all(...params);
+
+    return rows;
   }
 }
