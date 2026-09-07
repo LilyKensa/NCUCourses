@@ -28,8 +28,8 @@ export interface Course {
   id: number;
   classNumber: string;
   title: string;
-  teacher: string[];
-  clocks: number[];
+  teachers: string[];
+  clocks: string[];
   classrooms: string[];
   credits: number;
   people: {

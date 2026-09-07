@@ -37,8 +37,8 @@ export namespace NCUInterface {
             id,
             classNumber: get("ClassNo"),
             title: get("Title"),
-            teacher: get("Teacher").split(", "),
-            clocks: get("ClassTime").split(",").map(s => Number.parseInt(s)),
+            teachers: get("Teacher").split(", "),
+            clocks: get("ClassTime").split(","),
             classrooms: details["時間/教室"].split(/\n/g).filter(line => line.match(/\|/g)).map(line => line.split("|")[1].trim()),
             credits: getInt("credit"),
             people: {

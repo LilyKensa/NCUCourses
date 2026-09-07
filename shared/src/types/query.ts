@@ -1,54 +1,53 @@
-import { Course } from "./database";
-
-const allowedColumnsList = [
-  "id", "classNumber", "title",
-  "teacher", "clocks", "classrooms",
-  "credits", "people_limit", "people_admitted",
-  "people_applying", "passwordCard", "department",
-  "targetDegree", "language",
-] as (keyof Course)[];
-export const allowedColumns = new Set(allowedColumnsList);
-
-export type QueryColumn = typeof allowedColumnsList[number];
-
-export const operatorMap = {
-  eq: "=",
-  neq: "!=",
-  gt: ">",
-  gte: ">=",
-  lt: "<",
-  lte: "<=",
-  in: "IN"
-};
-
-export type QueryOperator = keyof typeof operatorMap;
-
-type QueryOperatorValueMap<Col extends QueryColumn> = {
-  ["eq"]: Course[Col];
-  ["neq"]: Course[Col];
-  ["gt"]: Course[Col];
-  ["gte"]: Course[Col];
-  ["lt"]: Course[Col];
-  ["lte"]: Course[Col];
-  ["in"]: Course[Col][];
-};
-
-export interface FieldCondition<Col extends QueryColumn, Op extends QueryOperator> {
-  field: Col;
-  op: Op;
-  value: QueryOperatorValueMap<Col>[Op];
+export enum MatchOp {
+  EQ = "eq", 
+  NEQ = "neq", 
+  GT = "gt", 
+  GTE = "gte", 
+  LT = "lt", 
+  LTE = "lte", 
+  INCLUDES = "includes", 
+  IN = "in"
 }
 
-export type AnyFieldCondition = {
-  [Col in QueryColumn]: {
-    [Op in QueryOperator]: FieldCondition<Col, Op>;
-  }[QueryOperator];
-}[QueryColumn];
-
-export interface LogicalGroup {
-  and?: QueryNode[];
-  or?: QueryNode[];
-  not?: QueryNode;
+export interface MatchCondition {
+  op: MatchOp;
+  value: any;
 }
 
-export type QueryNode = LogicalGroup | AnyFieldCondition;
+export interface ScalarCondition {
+  field: string;
+  match: MatchCondition;
+}
+
+export interface ArrayCondition {
+  field: string;
+  op: "any" | "all";
+  each: MatchCondition;
+}
+
+export type LogicalNode =
+  | { and: QueryNode[] }
+  | { or: QueryNode[] }
+  | { not: QueryNode };
+
+export type QueryNode = LogicalNode | ScalarCondition | ArrayCondition;
+
+export const SCALAR_FIELDS: Record<string, string> = {
+  id: "c.id",
+  classNumber: "c.classNumber",
+  title: "c.title",
+  credits: "c.credits",
+  people_limit: "c.people_limit",
+  people_admitted: "c.people_admitted",
+  people_applying: "c.people_applying",
+  passwordCard: "c.passwordCard",
+  department: "c.department",
+  targetDegree: "c.targetDegree",
+  language: "c.language"
+};
+
+export const ARRAY_FIELDS: Record<string, string> = {
+  teachers: "course_teachers",
+  clocks: "course_clocks",
+  classrooms: "course_classrooms"
+};
