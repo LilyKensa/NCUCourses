@@ -1,7 +1,7 @@
 import * as XmlJs from "xml-js";
 import { Utils } from "./utils";
-import { Degree, Language, PasswordCard } from "@ncu-courses/shared/types";
-import { Core } from "../core";
+import { Course, Degree, Language, PasswordCard } from "@ncu-courses/shared/types";
+import { Db } from "../database";
 import * as cheerio from "cheerio";
 
 export namespace NCUInterface {
@@ -12,14 +12,12 @@ export namespace NCUInterface {
   const detailEndpoint = "https://cis.ncu.edu.tw/Course/main/support/courseDetail.html";
 
   export async function updateDatabase() {
-    await Core.save(Core.coursesFile.replace(/\.json$/g, ".backup.json"));
-
-    Core.courses = [];
-
-    const visited = new Set<number>();
+    const visited = Db.getAllKeys();
 
     for (let w of weekdays) {
       for (let c of clocks) {
+        const courses: Course[] = [];
+
         const data = await fetch(`${listEndpoint}?id=daysection_${w}_${c}`, {
           headers: Utils.fetchHeaders
         }).then(res => res.text());
@@ -35,7 +33,7 @@ export namespace NCUInterface {
 
           let details = await fetchDetails(id);
 
-          Core.courses.push({
+          courses.push({
             id,
             classNumber: get("ClassNo"),
             title: get("Title"),
@@ -61,7 +59,7 @@ export namespace NCUInterface {
               "碩士在職專班": Degree.WORKING_MASTER,
               "碩博同修": Degree.MASTER_AND_DOCTERATE,
               "師資培育": Degree.TEACHER
-            }, details["課程學制"]),
+            }, details["課程學制"], Degree.NONE),
             language: Utils.enumerate({
               "國語": Language.CHINESE,
               "英語": Language.ENGLISH,
@@ -69,7 +67,7 @@ export namespace NCUInterface {
               "法語": Language.FRENCH,
               "部分英語": Language.PARTIAL_ENGLISH,
               "日語": Language.JAPANESE,
-              "部分客語": Language.PARTIAL_HAKKA
+              "部份客語": Language.PARTIAL_HAKKA
             }, details["授課語言"])
           });
           visited.add(id);
@@ -81,11 +79,10 @@ export namespace NCUInterface {
         }
         await Promise.all(promises);
 
+        Db.addMany(courses);
         console.log(`Done ${w}-${c}`);
       }
     }
-
-    await Core.save();
   }
 
   export async function fetchDetails(id: number) {
@@ -115,15 +112,6 @@ export namespace NCUInterface {
   }
 
   export async function check() {
-    const visited = new Set<number>();
-    for (let course of Core.courses) {
-      if (visited.has(course.id)) continue;
-      if (course.targetDegree === undefined) {
-        console.log(course.id);
-      }
-      visited.add(course.id);
-    }
-
-    await Core.save();
+    
   }
 }

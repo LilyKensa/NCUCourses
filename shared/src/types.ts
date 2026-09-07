@@ -5,6 +5,7 @@ export enum PasswordCard {
 }
 
 export enum Degree {
+  NONE = -1,
   BACHELOR,
   MASTER,
   DOCTERATE,

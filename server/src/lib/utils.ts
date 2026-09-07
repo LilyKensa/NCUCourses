@@ -11,8 +11,11 @@ export namespace Utils {
       .join("; ");
   }
 
-  export function enumerate<T>(rec: Record<string, T>, key: string) {
-    if (!Object.hasOwn(rec, key)) console.warn(`Enum key ${key} not found in record ${JSON.stringify(rec, null, 2)}`);
+  export function enumerate<T>(rec: Record<string, T>, key: string, def: any = undefined) {
+    if (!Object.hasOwn(rec, key)) {
+      console.warn(`Enum key "${key}" not found in record ${JSON.stringify(rec, null, 2)}`);
+      return def;
+    }
     return rec[key]!;
   }
 }

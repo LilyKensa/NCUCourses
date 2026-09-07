@@ -14,9 +14,7 @@ rl.on("line", async (line) => {
   switch (command.toLowerCase()) {
     case "help": {
       console.log("Available commands:");
-      console.log("  status          - Show server status and connected players");
-      console.log("  broadcast <msg> - Send a message to all users");
-      console.log("  stop            - Gracefully shut down the server");
+      console.log("  update - Re-fetch the database");
       break;
     }
     case "update": {
