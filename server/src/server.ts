@@ -1,6 +1,7 @@
-import Fastify, { FastifyPluginAsync } from "fastify";
+import Fastify from "fastify";
 import { Config } from "@ncu-courses/shared/config";
 import * as PinoPretty from "pino-pretty";
+import { routeApi } from "./routes/api";
 
 const app = Fastify({
   routerOptions: {
@@ -19,22 +20,11 @@ const app = Fastify({
   }
 });
 
-const apiRoutes: FastifyPluginAsync = async (route, options) =>{
-  route.get("/ping", async () => {
-    return { 
-      status: "ok", 
-      timestamp: new Date().toISOString()
-    };
-  });
-};
+app.register(routeApi, { prefix: "/ncu-courses/api" });
 
-app.register(apiRoutes, { prefix: "/ncu-courses/api" });
-
-const start = async () => {
+export const startServer = async () => {
   await app.listen({ 
     host: "0.0.0.0",
     port: Config.serverPort
   });
 };
-
-start();
