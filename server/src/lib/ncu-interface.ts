@@ -3,22 +3,18 @@ import { Utils } from "./utils";
 import { Course, Degree, Language, PasswordCard } from "@ncu-courses/shared/types/database";
 import { Db } from "../database";
 import * as cheerio from "cheerio";
+import { Config } from "@ncu-courses/shared/config";
 
 export namespace NCUInterface {
-  export const weekdays = "0123456".split("");
-  export const clocks = "1234Z56789ABCD".split("");
-
-  const listEndpoint = "https://cis.ncu.edu.tw/Course/main/support/course.xml";
-  const detailEndpoint = "https://cis.ncu.edu.tw/Course/main/support/courseDetail.html";
 
   export async function updateDatabase() {
     const visited = Db.getAllKeys();
 
-    for (let w of weekdays) {
-      for (let c of clocks) {
+    for (let w of Config.NCU.weekdays) {
+      for (let c of Config.NCU.clocks) {
         const courses: Course[] = [];
 
-        const data = await fetch(`${listEndpoint}?id=daysection_${w}_${c}`, {
+        const data = await fetch(`${Config.NCU.listEndpoint}?id=daysection_${w}_${c}`, {
           headers: Utils.fetchHeaders
         }).then(res => res.text());
         const elements: XmlJs.Element[] = XmlJs.xml2js(data).elements[0].elements;
@@ -89,7 +85,7 @@ export namespace NCUInterface {
   export async function fetchDetails(id: number) {
     const result: Record<string, string> = {};
 
-    const data = await fetch(`${detailEndpoint}?crs=${id}`, {
+    const data = await fetch(`${Config.NCU.detailEndpoint}?crs=${id}`, {
       headers: Utils.fetchHeaders
     }).then(res => res.text());
     const $ = cheerio.load(data);

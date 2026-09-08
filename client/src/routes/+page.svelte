@@ -6,6 +6,7 @@
     Language,
     type Course,
   } from "@ncu-courses/shared/types/database";
+    import { Config } from "@ncu-courses/shared/config";
 
   // --- Enums & Metadata ---
   const ENUMS: Record<string, {
@@ -41,9 +42,9 @@
     clock: []
   };
 
-  const xAxis = "日一二三四五六七";
+  const xAxis = "日一二三四五六";
   for (let x = 0; x < 7; ++x) {
-    for (let y of "1234Z56789ABCD") {
+    for (let y of Config.NCU.clocks) {
       ENUMS.clock.push({
         label: xAxis[x] + " " + y,
         value: x + y
@@ -631,8 +632,21 @@
           <tbody class="divide-y divide-slate-100 text-slate-600">
             {#each results as row}
               <tr class="hover:bg-slate-50/50">
-                <td class="p-3">{row.id}<br />{row.classNumber}</td>
-                <td class="p-3 font-semibold">{row.title}</td>
+                <td class="p-3">
+                  <a 
+                    class="underline underline-offset-2 cursor-pointer" 
+                    href="{Config.NCU.detailEndpoint}?crs={row.id}"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    {row.id}
+                    <br />
+                    {row.classNumber}
+                  </a>
+                </td>
+                <td class="p-3 font-semibold">
+                  {row.title}
+                </td>
                 <td class="p-3 max-w-37.5">{row.department}</td>
                 <td class="p-3">
                   {ENUMS.targetDegree[row.targetDegree]?.label}
