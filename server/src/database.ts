@@ -17,6 +17,7 @@ interface CourseRow {
   passwordCard: number;
   department: string;
   targetDegree: number;
+  required: 0 | 1;
   language: number;
   // Aggregated via json_group_array
   teachers?: string;
@@ -53,6 +54,7 @@ export class Db {
         passwordCard TINYINT NOT NULL,
         department TEXT NOT NULL,
         targetDegree TINYINT NOT NULL,
+        required BOOLEAN NOT NULL,
         language TINYINT NOT NULL
       );
 
@@ -99,6 +101,7 @@ export class Db {
       people_applying: course.people.applying,
       passwordCard: Number(course.passwordCard),
       department: course.department,
+      required: course.required ? 1 : 0,
       targetDegree: Number(course.targetDegree),
       language: Number(course.language),
     };
@@ -121,6 +124,7 @@ export class Db {
       },
       passwordCard: row.passwordCard as Course["passwordCard"],
       targetDegree: row.targetDegree as Course["targetDegree"],
+      required: !!row.required as Course["required"],
       language: row.language as Course["language"],
     };
   }
@@ -133,10 +137,10 @@ export class Db {
     const insertCourse = db.prepare(`
       INSERT OR REPLACE INTO courses (
         id, classNumber, title, credits, people_limit, people_admitted,
-        people_applying, passwordCard, department, targetDegree, language
+        people_applying, passwordCard, department, targetDegree, required, language
       ) VALUES (
         @id, @classNumber, @title, @credits, @people_limit, @people_admitted,
-        @people_applying, @passwordCard, @department, @targetDegree, @language
+        @people_applying, @passwordCard, @department, @targetDegree, @required, @language
       )
     `);
 

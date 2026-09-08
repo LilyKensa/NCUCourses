@@ -34,6 +34,10 @@
       { label: "日語", value: Language.JAPANESE },
       { label: "部份客語", value: Language.PARTIAL_HAKKA },
     ],
+    boolean: [
+      { label: "是", value: true },
+      { label: "否", value: false }
+    ],
     clock: []
   };
 
@@ -57,6 +61,7 @@
     { id: "people_applying", label: "待分發人數", type: "number" },
     { id: "passwordCard", label: "採用密碼卡", type: "enum_passwordCard" },
     { id: "department", label: "單位", type: "string" },
+    { id: "required", label: "必修", type: "enum_boolean" },
     { id: "targetDegree", label: "學制", type: "enum_targetDegree" },
     { id: "language", label: "語言", type: "enum_language" },
   ];
@@ -380,6 +385,7 @@
         {:else}
           <input
             type={fieldDef?.type === "number" ? "number" : "text"}
+            placeholder="輸入文字"
             bind:value={block.value}
             onmousedown={stopProp}
             class="input-light w-24"
@@ -435,6 +441,7 @@
         {:else}
           <input
             type={arrayDef?.type === "number" ? "number" : "text"}
+            placeholder="輸入文字"
             bind:value={block.value}
             onmousedown={stopProp}
             class="input-light w-24"
@@ -607,30 +614,36 @@
 
       <div class="table-scroller">
         <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 sticky top-0 text-slate-500 whitespace-nowrap">
+          <thead class="bg-slate-50 sticky top-0 text-slate-600 whitespace-nowrap">
             <tr>
               <th class="p-3">流水號 / 課號</th>
               <th class="p-3">標題</th>
               <th class="p-3">單位</th>
               <th class="p-3">學制</th>
               <th class="p-3">教師</th>
+              <th class="p-3">必修</th>
               <th class="p-3">學分</th>
               <th class="p-3">時段 / 教室</th>
               <th class="p-3">語言</th>
               <th class="p-3">人數 / 上限 (+待分發)</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 text-slate-600">
             {#each results as row}
               <tr class="hover:bg-slate-50/50">
                 <td class="p-3">{row.id}<br />{row.classNumber}</td>
                 <td class="p-3 font-semibold">{row.title}</td>
-                <td class="p-3 text-slate-500">{row.department}</td>
-                <td class="p-3 text-xs">
+                <td class="p-3 max-w-37.5">{row.department}</td>
+                <td class="p-3">
                   {ENUMS.targetDegree[row.targetDegree]?.label}
                 </td>
-                <td class="p-3 text-xs text-slate-500 max-w-37.5">
+                <td class="p-3 max-w-37.5">
                   {row.teachers?.join(", ")}
+                </td>
+                <td class="p-3">
+                  <div class="cursor-not-allowed">
+                    <input class="pointer-events-none" type="checkbox" checked={row.required} />
+                  </div>
                 </td>
                 <td class="p-3">{row.credits}</td>
                 <td class="p-3">
@@ -657,6 +670,7 @@
   /* Base Layout */
   .app-layout {
     @apply min-h-screen bg-slate-100 p-3 flex flex-col lg:flex-row gap-2 font-sans text-slate-800 select-none;
+    --drop-area-height: calc(100dvh - var(--spacing) * 180);
   }
 
   .toolbox-panel {
@@ -774,17 +788,20 @@
   }
 
   .root-drop-area {
-    @apply p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 min-h-50;
+    @apply p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 min-h-50 overflow-auto;
+    height: var(--drop-area-height);
   }
   .drop-slot.is-root.empty {
-    @apply bg-slate-200 border-slate-300 min-h-35;
+    @apply bg-slate-200 border-slate-300;
+    height: calc(var(--drop-area-height) - var(--spacing) * 13);
   }
   .root-drop-area .drop-slot.drag-active {
     @apply border-blue-400 bg-blue-100;
   }
 
   .spare-drop-area {
-    @apply flex flex-wrap gap-4 p-4 bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200 min-h-50 items-start content-start;
+    @apply flex flex-wrap gap-4 p-4 bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200 min-h-50 items-start content-start overflow-y-auto;
+    height: var(--drop-area-height);
   }
   .spare-drop-area.drag-active {
     @apply border-amber-400 bg-amber-50;
@@ -806,6 +823,6 @@
   }
 
   .table-scroller {
-    @apply max-h-100 overflow-auto rounded-xl border border-slate-200 shadow-inner bg-white;
+    @apply max-h-124 overflow-auto rounded-xl border border-slate-200 shadow-inner bg-white;
   }
 </style>

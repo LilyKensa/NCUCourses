@@ -39,6 +39,7 @@ export interface Course {
   };
   passwordCard: PasswordCard;
   department: string;
+  required: boolean;
   targetDegree: Degree;
   language: Language;
 }

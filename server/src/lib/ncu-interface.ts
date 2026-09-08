@@ -60,6 +60,7 @@ export namespace NCUInterface {
               "碩博同修": Degree.MASTER_AND_DOCTERATE,
               "師資培育": Degree.TEACHER
             }, details["課程學制"], Degree.NONE),
+            required: details["選修別"] === "必修",
             language: Utils.enumerate({
               "國語": Language.CHINESE,
               "英語": Language.ENGLISH,
