@@ -43,7 +43,8 @@ export const SCALAR_FIELDS: Record<string, string> = {
   passwordCard: "c.passwordCard",
   department: "c.department",
   targetDegree: "c.targetDegree",
-  language: "c.language"
+  language: "c.language",
+  required: "c.required"
 };
 
 export const ARRAY_FIELDS: Record<string, string> = {
